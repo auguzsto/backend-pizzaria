@@ -57,7 +57,7 @@ public class UserService implements IUser {
         user.setPassword(bCryptPasswordEncoder.encode(dto.getPassword()));
         user.setNumberPhone(dto.getNumberPhone());
         user.setAddress(dto.getAddress());
-        user.setVendor(dto.getVendor());
+        user.setVendor(0);
         user.setBasicToken(HttpHeaders.encodeBasicAuth(dto.getEmail(), dto.getPassword(), StandardCharsets.ISO_8859_1));
        
         userRepository.save(user);
@@ -72,7 +72,10 @@ public class UserService implements IUser {
 
                     //Set password
                     if(dto.getPassword() == null) dto.setPassword(user.getPassword());
-                    if(!dto.getPassword().equals(user.getPassword())) user.setPassword(dto.getPassword());
+                    if(!dto.getPassword().equals(user.getPassword())) {
+                        user.setPassword(bCryptPasswordEncoder.encode(dto.getPassword()));
+                        user.setBasicToken(HttpHeaders.encodeBasicAuth(user.getEmail(), dto.getPassword(), StandardCharsets.ISO_8859_1));
+                    }
 
                     //Set number phone
                     if(dto.getNumberPhone() == null) dto.setNumberPhone(user.getNumberPhone());
@@ -98,7 +101,7 @@ public class UserService implements IUser {
     public void delete(UserDTO dto) {
         //Check if user exists.
         User user = userRepository.findById(dto.getId()).orElseThrow(
-            () -> new ResponseStatusException(HttpStatus.BAD_REQUEST)
+            () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Usuário inválido")
         );
 
         //Delete user.

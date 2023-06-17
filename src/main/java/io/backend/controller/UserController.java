@@ -34,14 +34,14 @@ public class UserController  implements IUser {
     @Override
     @PatchMapping
     @CrossOrigin
-    public void update(UserDTO dto) {
+    public void update(@RequestBody UserDTO dto) {
         userService.update(dto);
     }
 
     @Override
-    @DeleteMapping("/{id}")
+    @DeleteMapping
     @CrossOrigin
-    public void delete(@PathParam("id") UserDTO dto) {
+    public void delete(UserDTO dto) {
         userService.delete(dto);
     }
     
