@@ -1,5 +1,6 @@
 package io.backend.services;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -44,7 +45,7 @@ public class ItemService implements IItem {
 
 	@Override
 	public List<ItemDTO> allOffer(ItemDTO dto) {
-		return itemRepository.findByPriceOffer(dto).stream().map(
+		return itemRepository.findAllPriceOffer().stream().map(
 				item -> modelMapper.map(item, ItemDTO.class)
 		).collect(Collectors.toList());
 	}
