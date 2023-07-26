@@ -34,6 +34,9 @@ public class SecurityConfig {
                 requestMatchers("POST", "/auth").permitAll().
                 requestMatchers("GET", "/cart/**").permitAll().
                 requestMatchers("GET", "/cart/**").permitAll().
+                requestMatchers("POST", "/ws-message/**").permitAll().
+                requestMatchers("GET", "/ws-message/**").permitAll().
+                requestMatchers("POST", "/event").permitAll().
                 anyRequest().
                 authenticated().
                 and().

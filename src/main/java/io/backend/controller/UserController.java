@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.*;
 import io.backend.DTO.UserDTO;
 import io.backend.interfaces.IUser;
 import io.backend.services.UserService;
-import jakarta.websocket.server.PathParam;
 
 import java.util.List;
 

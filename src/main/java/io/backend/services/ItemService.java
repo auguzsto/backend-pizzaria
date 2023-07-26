@@ -1,6 +1,5 @@
 package io.backend.services;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -43,75 +42,76 @@ public class ItemService implements IItem {
 		).collect(Collectors.toList());
 	}
 
-	@Override
-	public List<ItemDTO> allOffer(ItemDTO dto) {
-		return itemRepository.findAllPriceOffer().stream().map(
-				item -> modelMapper.map(item, ItemDTO.class)
-		).collect(Collectors.toList());
-	}
 
-	@Override
-	@Transactional
-	public void add(ItemDTO dto) {
-		//Get user && check if user exists.
-		userRepository.findById(dto.getIdUser()).map(
-				user -> {
-					if(user.getVendor() == 0) {
-						throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Usuário não é vendedor");
+		@Override
+		public List<ItemDTO> allOffer(ItemDTO dto) {
+			return itemRepository.findAllPriceOffer().stream().map(
+					item -> modelMapper.map(item, ItemDTO.class)
+			).collect(Collectors.toList());
+		}
+
+		@Override
+		@Transactional
+		public void add(ItemDTO dto) {
+			//Get user && check if user exists.
+			userRepository.findById(dto.getIdUser()).map(
+					user -> {
+						if(user.getVendor() == 0) {
+							throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Usuário não é vendedor");
+						}
+
+						Item item = new Item();
+						item.setName(dto.getName());
+						item.setPrice(dto.getPrice());
+						if(dto.getPriceOffer() == null) item.setPriceOffer(0.0); else item.setPriceOffer(dto.getPriceOffer());
+						if(dto.getDescription() == null) item.setDescription("Não há descrição neste item"); else item.setDescription(dto.getDescription());
+						item.setUser(user);
+
+						return itemRepository.save(item);
+
 					}
+			).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Usuário inválido"));
+		}
 
-					Item item = new Item();
-					item.setName(dto.getName());
-					item.setPrice(dto.getPrice());
-					if(dto.getPriceOffer() == null) item.setPriceOffer(0.0); else item.setPriceOffer(dto.getPriceOffer());
-					if(dto.getDescription() == null) item.setDescription("Não há descrição neste item"); else item.setDescription(dto.getDescription());
-					item.setUser(user);
+		@Override
+		public void update(ItemDTO dto) {
+			//Check if item is exists.
+			itemRepository.findById(dto.getId()).map(
+					item -> {
 
-					return itemRepository.save(item);
+						//Set name
+						if(dto.getName() == null) dto.setName(item.getName());
+						if(!dto.getName().equals(item.getName())) item.setName(dto.getName());
 
-				}
-		).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Usuário inválido"));
-	}
+						//Set price
+						if(dto.getPrice() == null) dto.setPrice(item.getPrice());
+						if(!dto.getPrice().equals(item.getPrice())) item.setPrice(dto.getPrice());
 
-	@Override
-	public void update(ItemDTO dto) {
-		//Check if item is exists.
-		itemRepository.findById(dto.getId()).map(
-				item -> {
+						//Set price offer
+						if(dto.getPriceOffer() == null) dto.setPriceOffer(item.getPriceOffer());
+						if(!dto.getPriceOffer().equals(item.getPriceOffer())) item.setPriceOffer(dto.getPriceOffer());
 
-					//Set name
-					if(dto.getName() == null) dto.setName(item.getName());
-					if(!dto.getName().equals(item.getName())) item.setName(dto.getName());
+						//Set description
+						if(dto.getDescription() == null) dto.setDescription(item.getDescription());
+						if(!dto.getDescription().equals(item.getDescription())) item.setDescription(dto.getDescription());
 
-					//Set price
-					if(dto.getPrice() == null) dto.setPrice(item.getPrice());
-					if(!dto.getPrice().equals(item.getPrice())) item.setPrice(dto.getPrice());
+						return itemRepository.save(item);
 
-					//Set price offer
-					if(dto.getPriceOffer() == null) dto.setPriceOffer(item.getPriceOffer());
-					if(!dto.getPriceOffer().equals(item.getPriceOffer())) item.setPriceOffer(dto.getPriceOffer());
+					}
+			).orElseThrow(
+					() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Item inválido")
+			);
+		}
 
-					//Set description
-					if(dto.getDescription() == null) dto.setDescription(item.getDescription());
-					if(!dto.getDescription().equals(item.getDescription())) item.setDescription(dto.getDescription());
+		@Override
+		public void delete(ItemDTO dto) {
+			//Check if product exists.
+			Item item = itemRepository.findById(dto.getId()).orElseThrow(
+					() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Produto inválido.")
+			);
 
-					return itemRepository.save(item);
-
-				}
-		).orElseThrow(
-				() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Item inválido")
-		);
-	}
-
-	@Override
-	public void delete(ItemDTO dto) {
-		//Check if product exists.
-		Item item = itemRepository.findById(dto.getId()).orElseThrow(
-			() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Produto inválido.")
-		);
-
-		//Delete product.
-		itemRepository.delete(item);
-	}
+			//Delete product.
+			itemRepository.delete(item);
+		}
    
 }
